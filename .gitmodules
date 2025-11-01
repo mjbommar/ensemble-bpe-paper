@@ -1,0 +1,9 @@
+[submodule "references/tokenizers"]
+	path = references/tokenizers
+	url = https://github.com/huggingface/tokenizers.git
+[submodule "references/binary-bpe"]
+	path = references/binary-bpe
+	url = https://github.com/mjbommar/binary-bpe.git
+[submodule "references/minbpe"]
+	path = references/minbpe
+	url = https://github.com/karpathy/minbpe.git
