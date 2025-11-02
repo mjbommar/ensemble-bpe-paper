@@ -94,6 +94,14 @@ dmypy.json
 .coverage
 htmlcov/
 
+# Experiment outputs
+artifacts/
+results/
+
+# Local data (comment out to track)
+data/processed/
+data/raw/
+
 # Data files (uncomment if you don't want to track data)
 # data/
 # *.csv

@@ -1,0 +1,26 @@
+[data]
+provider = "hf_books"
+dataset = "pg19"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/hf_pg19_tiny"
+train_size = 10000
+valid_size = 1000
+test_size = 1000
+seed = 13
+
+[train]
+algo = "hf_bpe"
+exp_name = "pg19_bpe_tiny"
+vocab_size = 2000
+
+[eval]
+eval_split = "test"
+run_oos = false
+
+[baselines.tiktoken]
+encodings = ["gpt2"]
+
+[artifacts]
+out_dir = "artifacts"
+

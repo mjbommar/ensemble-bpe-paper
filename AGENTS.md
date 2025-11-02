@@ -1,0 +1,48 @@
+# Repository Guidelines
+
+## Project Structure & Module Organization
+- `src/` Python package (framework, tokenizers, metrics, CLI helpers).
+- `scripts/` CLI entry points (e.g., `prepare_data`, `train_tokenizer`, `eval_compression`).
+- `experiments/` versioned configs (TOML/YAML) driving runs.
+- `data/raw/`, `data/processed/` local datasets and splits (do not commit large files).
+- `artifacts/` per‑run outputs: `config.yaml`, `metrics.json`, `tokenizer.json`, `logs.txt`, `env.txt`.
+- `paper/`, `references/`, `notes/` writing and background.
+
+## Build, Test, and Development Commands
+- Python 3.13 is required. Run via uv only. Project deps are pinned; no `--with` needed.
+  - `uv run python -V` (verify env)
+  - `uv run python -m scripts.prepare_data --out data/processed`
+  - `uv run python -m scripts.train_tokenizer --config experiments/hf_bpe.toml`
+  - `uv run python -m scripts.eval_compression --config experiments/hf_bpe.toml`
+  - `uv run pytest -q` (tests)
+
+## Coding Style & Naming Conventions
+- Python 3.13, 4‑space indent, PEP8.
+- Names: `snake_case` for functions/vars, `PascalCase` for classes, `UPPER_SNAKE` for constants.
+- Prefer type hints; keep modules focused and small.
+- Formatting/lint: `uv run ruff format .` and `uv run ruff check .`.
+
+## Testing Guidelines
+- Framework: `pytest`. Place tests under `tests/` named `test_*.py`.
+- Add unit tests for new features plus HF‑compat invariants:
+  - Export `tokenizer.json`, reload with `tokenizers.Tokenizer.from_file`, and assert round‑trip `detokenize(tokenize(x)) == x` for sample texts.
+- Keep tests fast; prefer synthetic inputs and small corpus slices.
+
+## Commit & Pull Request Guidelines
+- Commits: imperative mood, concise subject; include rationale in body when non‑trivial.
+- PRs: describe purpose, linked issues, how to run, and artifact path (e.g., `artifacts/2025-11-01_expname/`). Include before/after metrics when relevant.
+
+## Security & Configuration Tips
+- Do not commit large datasets or generated artifacts; keep only `.gitkeep` placeholders.
+- Preserve 100% HF compatibility for any exported tokenizer (`tokenizer.json`).
+- Record environment for every run (write `env.txt` via uv and `pip freeze`/`python -V`).
+
+## Replication Focus
+- This repository hosts a research paper plus related source and experiment data. Aim for strict replication:
+  - Commit configs to `experiments/` and pin random seeds.
+  - Snapshot dataset versions and document sources/hashes.
+  - Save all run artifacts under `artifacts/<date>_<expname>/`.
+
+## Architecture Overview & Agent Notes
+- Python‑first design; promote hotspots to Rust via `pyo3` only if benchmarks require, keeping HF format compatibility.
+- Agents editing this repo should use `apply_patch`, keep diffs minimal, and prefer `uv run` in any example or automation.

@@ -1,0 +1,19 @@
+[data]
+dict_path = "/usr/share/dict"
+out_dir = "data/processed"
+train_size = 50000
+valid_size = 5000
+test_size = 5000
+lower = true
+seed = 13
+
+[train]
+exp_name = "hf_bpe_baseline"
+vocab_size = 2000
+
+[eval]
+eval_split = "test"  # or "valid"
+
+[artifacts]
+out_dir = "artifacts"
+

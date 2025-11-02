@@ -1,0 +1,32 @@
+[data]
+provider = "hf_books"
+dataset = "common-pile/project_gutenberg"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/pg_books_e1_64k"
+train_size = 650000
+valid_size = 20000
+test_size = 20000
+seed = 13
+
+[train]
+exp_name = "e1_pg_64k"
+vocab_size = 65536
+
+[eval]
+run_oos = true
+
+[oos_data]
+provider = "hf_books"
+dataset = "common-pile/project_gutenberg"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/pg_books_e1_64k_oos"
+train_size = 0
+valid_size = 0
+test_size = 40000
+seed = 23
+
+[artifacts]
+out_dir = "artifacts"
+

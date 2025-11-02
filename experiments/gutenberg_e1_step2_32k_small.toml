@@ -1,0 +1,24 @@
+[data]
+provider = "hf_books"
+dataset = "common-pile/project_gutenberg"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/pg_books_step2_32k_small"
+train_size = 500
+valid_size = 50
+test_size = 50
+seed = 13
+streaming = true
+oos_by_hash = true
+oos_frac = 0.2
+
+[train]
+exp_name = "e1_pg_step2_32k_small"
+vocab_size = 32768
+
+[eval]
+run_oos = true
+
+[artifacts]
+out_dir = "artifacts"
+

@@ -1,0 +1,35 @@
+[data]
+provider = "hf_books"
+local_files = "data/raw/local_books"
+out_dir = "data/processed/local_books_tiny"
+train_size = 2
+valid_size = 1
+test_size = 1
+seed = 13
+
+[oos_data]
+provider = "hf_books"
+local_files = "data/raw/local_books_oos"
+out_dir = "data/processed/local_books_oos"
+test_size = 1
+seed = 7
+
+[train]
+algo = "hf_bpe"
+exp_name = "local_books_bpe_tiny_ens"
+vocab_size = 256
+
+[ensemble]
+enabled = true
+num_shards = 2
+vocab_size = 256
+
+[eval]
+eval_split = "test"
+run_oos = true
+
+[baselines.tiktoken]
+encodings = ["gpt2"]
+
+[artifacts]
+out_dir = "artifacts"

@@ -1,0 +1,25 @@
+[data]
+provider = "hf_books"
+dataset = "common-pile/project_gutenberg"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/pg_books_ens_smoke"  # reuse same prepared data path
+train_size = 2000
+valid_size = 200
+test_size = 200
+seed = 13
+streaming = true
+oos_by_hash = true
+oos_frac = 0.1
+
+[train]
+exp_name = "pg_bpe_16k_smoke_single"
+algo = "hf_bpe"
+vocab_size = 16384
+
+[eval]
+run_oos = true
+
+[artifacts]
+out_dir = "artifacts"
+

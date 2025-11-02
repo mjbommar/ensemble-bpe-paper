@@ -1,0 +1,22 @@
+[data]
+provider = "hf_books"
+local_files = "data/raw/local_books"
+out_dir = "data/processed/local_books_tiny"
+train_size = 2
+valid_size = 1
+test_size = 1
+seed = 13
+
+[train]
+algo = "hf_bpe"
+exp_name = "local_books_bpe_tiny"
+vocab_size = 256
+
+[eval]
+eval_split = "test"
+
+[baselines.tiktoken]
+encodings = ["gpt2"]
+
+[artifacts]
+out_dir = "artifacts"

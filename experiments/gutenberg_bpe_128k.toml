@@ -1,0 +1,33 @@
+[data]
+provider = "hf_books"
+dataset = "common-pile/project_gutenberg"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/pg_books_128k_sample"
+train_size = 800000
+valid_size = 20000
+test_size = 20000
+seed = 13
+
+[train]
+exp_name = "pg_bpe_128k"
+algo = "hf_bpe"
+vocab_size = 131072
+
+[eval]
+run_oos = true
+
+[oos_data]
+provider = "hf_books"
+dataset = "common-pile/project_gutenberg"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/pg_books_128k_oos"
+train_size = 0
+valid_size = 0
+test_size = 40000
+seed = 23
+
+[artifacts]
+out_dir = "artifacts"
+

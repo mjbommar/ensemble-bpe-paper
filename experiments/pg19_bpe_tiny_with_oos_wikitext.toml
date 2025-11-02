@@ -1,0 +1,36 @@
+[data]
+provider = "hf_books"
+dataset = "pg19"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/hf_pg19_tiny"
+train_size = 8000
+valid_size = 1000
+test_size = 1000
+seed = 13
+
+[oos_data]
+provider = "hf_books"
+dataset = "wikitext"
+config = "wikitext-2-v1"
+split = "test"
+text_field = "text"
+out_dir = "data/processed/hf_wikitext2_oos"
+test_size = 1000
+seed = 7
+
+[train]
+algo = "hf_bpe"
+exp_name = "pg19_bpe_tiny_wt2_oos"
+vocab_size = 2000
+
+[eval]
+eval_split = "test"
+run_oos = true
+
+[baselines.tiktoken]
+encodings = ["gpt2"]
+
+[artifacts]
+out_dir = "artifacts"
+
