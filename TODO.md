@@ -242,6 +242,7 @@ Next actions to reach camera‑ready results:
   - Size sweep plot: vocab∈{8k,16k,32k,64k} comparing BPE/WordPiece/Unigram and ensemble selection.
   - Ablation: merge voting (unweighted vs weighted θ) vs selection.
 - [ ] Replication pack: pinned dataset revisions, seeds, env.txt, `uv.lock`, and one-click scripts to regenerate tables/plots.
+  - [x] Add bash one-click wrapper `scripts/run_paper.sh` mirroring Python runner flags (small/full profiles, seeds, K, sizes). (2025-11-02)
 
 ## K-Scaling and Shard Ablations (Ensemble Strength)
 

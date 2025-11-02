@@ -100,13 +100,20 @@ Local books IS/OOS by file (titles) and HF hash-based OOS
 
 **Full Paper Run (one command)**
 - Small laptop-safe profile (streaming; tiny samples):
-  - `uv run python -m scripts.run_paper --profile small`
+  - `uv run python -m scripts.run_paper --profile small` or `./scripts/run_paper.sh --profile small`
 - Full server profile (non-streaming; larger samples; pass HF revision to pin snapshot):
-  - `uv run python -m scripts.run_paper --profile full --revision <hf_revision_hash> --seeds 13 17 19`
+  - `uv run python -m scripts.run_paper --profile full --revision <hf_revision_hash> --seeds 13 17 19`  
+    or `./scripts/run_paper.sh --profile full --revision <hf_revision_hash> --seeds 13 17 19 --k 1 2 4 8 --include-k16`
 - Outputs:
   - Aggregated CSV/JSON under `artifacts/paper_run/aggregated/`
   - Markdown/LaTeX tables under `results/table.md` and `results/table.tex`
   - E0 K-scaling summaries under `artifacts/paper_run/e0_k_scaling/`
+
+**Bash Entry Point**
+- Convenience wrapper: `scripts/run_paper.sh` mirrors the Python runner flags and adds `--dry-run`.
+- Examples:
+  - `./scripts/run_paper.sh --profile small`
+  - `./scripts/run_paper.sh --profile full --revision <hf_rev> --seeds 13 17 19 --k 1 2 4 8 --include-k16 --sizes 8192 16384 32768 65536`
 
 **Python ↔ Rust Plan**
 - Prototype all functionality in Python. If microbenchmarks show unacceptable runtime or memory, implement the hotspot in Rust and expose via `pyo3`, keeping exported `tokenizer.json` fully HF‑compatible.
