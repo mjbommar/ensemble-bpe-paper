@@ -1,0 +1,25 @@
+[data]
+provider = "hf_books"
+dataset = "common-pile/project_gutenberg"
+split = "train"
+text_field = "text"
+out_dir = "data/processed/pg_paper_full"
+train_size = 8000
+valid_size = 800
+test_size = 800
+seed = 13
+# non-streaming preferred for snapshot pinning; pass --revision in run_paper
+
+[train]
+exp_name = "e1_pg_full"
+vocab_size = 32768
+
+[eval]
+run_oos = true
+
+[baselines]
+tiktoken.encodings = ["gpt2"]
+
+[artifacts]
+out_dir = "artifacts"
+
