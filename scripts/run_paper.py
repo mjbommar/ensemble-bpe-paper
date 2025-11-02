@@ -206,7 +206,7 @@ def main(argv: list[str] | None = None) -> int:
     # Find latest K=4 ensemble pipeline and run weighted merge
     # This is best-effort; failure here should not block the rest
     try:
-        e4_glob = list(Path("artifacts").rglob("*pg_v16384_k4*_pipeline/pipeline.json"))
+        e4_glob = list(Path(args.out).rglob("*pg_v16384_k4*_pipeline/pipeline.json"))
         if e4_glob:
             pipe_json = e4_glob[-1]
             pipe = json.loads(pipe_json.read_text(encoding="utf-8"))
@@ -222,12 +222,16 @@ def main(argv: list[str] | None = None) -> int:
     except Exception:
         pass
 
-    # 5) Aggregate and make tables
-    agg_out = _run(["uv", "run", "python", "-m", "scripts.aggregate_metrics", "--inputs", "artifacts", "--out", str(Path(args.out) / "aggregated")])
+    # 5) Aggregate and make tables (scope to this run's out dir)
+    agg_out = _run([
+        "uv", "run", "python", "-m", "scripts.aggregate_metrics",
+        "--inputs", str(Path(args.out)),
+        "--out", str(Path(args.out) / "aggregated"),
+    ])
     summary_csv = _last_line(agg_out)
     # Include one seeds stats file if exists (first found)
     seeds_stats = None
-    for p in Path("artifacts").rglob("seeds_stats.json"):
+    for p in Path(args.out).rglob("seeds_stats.json"):
         seeds_stats = str(p)
         break
     _ = _run([
@@ -243,4 +247,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
-
