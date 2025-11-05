@@ -67,3 +67,24 @@
 - Status: COMPLETE - ready for paper writing
 - Location: `src/ebpe/ensemble.py`, `/nas4/data/experiments/ensemble-bpe/paper_e2e_evaluations/`
 - Agents should focus on paper writing, figure generation, and documenting the quality amplification mechanism
+
+## Experiment Automation Roadmap (2025-11-05)
+**Problem Identified**: Current pipeline requires manual intervention for complete automation
+- Nov 2025 run required manual creation of merge tokenizers and separate Stack evaluation
+- Root cause: Merge tokenizer creation (exp_p2, exp_p3, sequential, etc.) not automated
+- Gap: Missing phase between training and evaluation to create all 7 merge variants
+
+**Solution Designed**: See `AUTOMATION.md` for complete architecture
+- **Minimal viable (1-2 days)**: 3 scripts eliminate manual intervention
+  - `create_all_merges.py` - batch create all merge tokenizers
+  - `evaluate_all_domains.py` - parallel evaluation on all domains
+  - `verify_experiment.py` - completeness checking
+- **Full system (1-2 weeks)**: Manifest-based orchestrator with resumption
+  - `run_paper_automated.py` - single-command complete automation
+  - Manifest.json registry for tracking all artifacts
+  - Idempotent execution, automatic verification, error recovery
+
+**Priority**: Implement before next large-scale experiment run
+- Current checkpoint (checkpoint-20251105) is production-ready for paper
+- Automation improves future reproducibility and eliminates manual steps
+- Agents should reference AUTOMATION.md when implementing experiment runners
