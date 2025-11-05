@@ -40,13 +40,14 @@ def train_hf_bpe(train_files: list[str], vocab_size: int = 2000, add_prefix_spac
     from tokenizers import Tokenizer
     from tokenizers.models import BPE
     from tokenizers.trainers import BpeTrainer
-    from tokenizers.pre_tokenizers import Metaspace
-    from tokenizers.decoders import Metaspace as MetaspaceDecoder
+    from tokenizers.pre_tokenizers import ByteLevel
+    from tokenizers.decoders import ByteLevel as ByteLevelDecoder
 
-    tokenizer = Tokenizer(BPE(unk_token="[UNK]", byte_fallback=True))
-    # Use Metaspace to preserve exact whitespace round-trips with a visible marker
-    tokenizer.pre_tokenizer = Metaspace(replacement="▁")
-    tokenizer.decoder = MetaspaceDecoder(replacement="▁")
+    tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
+    # Use ByteLevel to ensure we start with exactly 256 bytes, allowing BPE merges
+    # to work correctly even when corpus has many unique Unicode characters
+    tokenizer.pre_tokenizer = ByteLevel(add_prefix_space=add_prefix_space)
+    tokenizer.decoder = ByteLevelDecoder()
 
     trainer = BpeTrainer(vocab_size=vocab_size, special_tokens=["[UNK]"])
     tokenizer.train(files=train_files, trainer=trainer)

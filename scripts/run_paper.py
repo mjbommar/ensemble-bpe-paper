@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List
@@ -29,8 +30,31 @@ import tomllib
 
 
 def _run(cmd: list[str], env: dict | None = None) -> str:
-    out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, env=env)
-    return out.decode("utf-8", errors="replace")
+    try:
+        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, env=env)
+        return out.decode("utf-8", errors="replace")
+    except subprocess.CalledProcessError as e:
+        print(f"\n{'='*80}", file=sys.stderr)
+        print(f"ERROR: Command failed with exit code {e.returncode}", file=sys.stderr)
+        print(f"Command: {' '.join(cmd)}", file=sys.stderr)
+        print(f"{'='*80}", file=sys.stderr)
+        if e.output:
+            print("Full output from failed command:", file=sys.stderr)
+            print(e.output.decode("utf-8", errors="replace"), file=sys.stderr)
+        print(f"{'='*80}\n", file=sys.stderr)
+        # Write to error log file as well
+        error_log = Path("artifacts/run_paper_error.log")
+        error_log.parent.mkdir(parents=True, exist_ok=True)
+        with error_log.open("a", encoding="utf-8") as f:
+            f.write(f"\n{'='*80}\n")
+            f.write(f"ERROR at {json.dumps(subprocess.run(['date'], capture_output=True, text=True).stdout.strip())}\n")
+            f.write(f"Command: {' '.join(cmd)}\n")
+            f.write(f"Exit code: {e.returncode}\n")
+            if e.output:
+                f.write("Output:\n")
+                f.write(e.output.decode("utf-8", errors="replace"))
+            f.write(f"\n{'='*80}\n")
+        raise
 
 
 def _last_line(s: str) -> str:
@@ -138,6 +162,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Per-seed E1 runs
     e1_summaries: List[Path] = []
+    e1_out_root = Path(args.out) / "e1_sizes"
     for sd in args.seeds:
         with tempfile.TemporaryDirectory() as td:
             cfg = json.loads(json.dumps(e1_cfg))
@@ -149,8 +174,53 @@ def main(argv: list[str] | None = None) -> int:
                 "uv", "run", "--with", "tokenizers", "--with", "psutil",
                 "python", "-m", "scripts.run_e1_sizes",
                 "--config", str(tmp), "--sizes", *[str(s) for s in args.sizes],
+                "--out", str(e1_out_root / f"seed_{sd}"),
             ])
             e1_summaries.append(Path(_last_line(out)))
+
+    # Aggregate E1 results across seeds
+    if e1_summaries:
+        import csv as csv_module
+        import statistics
+        all_e1_rows = []
+        for summary_path in e1_summaries:
+            with summary_path.open("r", encoding="utf-8") as f:
+                reader = csv_module.DictReader(f)
+                for row in reader:
+                    all_e1_rows.append(row)
+
+        # Write combined summary with all seeds
+        e1_combined = e1_out_root / "e1_sizes_summary_all_seeds.csv"
+        e1_out_root.mkdir(parents=True, exist_ok=True)
+        if all_e1_rows:
+            fieldnames = list(all_e1_rows[0].keys())
+            with e1_combined.open("w", newline="", encoding="utf-8") as f:
+                writer = csv_module.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(all_e1_rows)
+
+        # Compute seeds statistics (variance across seeds for same algo/vocab)
+        from collections import defaultdict
+        grouped = defaultdict(list)
+        for row in all_e1_rows:
+            key = (row["algo"], row["vocab_size"])
+            grouped[key].append(float(row["tokens_per_byte"]))
+
+        seeds_stats = []
+        for (algo, vocab), values in grouped.items():
+            if len(values) > 1:
+                seeds_stats.append({
+                    "algo": algo,
+                    "vocab_size": vocab,
+                    "mean_tokens_per_byte": statistics.mean(values),
+                    "std_tokens_per_byte": statistics.stdev(values),
+                    "num_seeds": len(values)
+                })
+
+        if seeds_stats:
+            (e1_out_root / "seeds_stats.json").write_text(
+                json.dumps(seeds_stats, indent=2) + "\n", encoding="utf-8"
+            )
 
     # 3) E0: selection vs single at 16k and 32k with K-scaling
     # Build base single and ensemble configs in-memory and override K

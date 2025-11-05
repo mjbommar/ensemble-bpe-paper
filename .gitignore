@@ -98,6 +98,13 @@ htmlcov/
 artifacts/
 results/
 
+# Timestamped artifact directories (failed/test runs)
+artifacts_*/
+
+# Temporary configuration files
+tmp_*.toml
+tmp_*.yaml
+
 # Local data (comment out to track)
 data/processed/
 data/raw/

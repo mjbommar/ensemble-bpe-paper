@@ -44,7 +44,7 @@ def train_hf_unigram(train_files: list[str], vocab_size: int = 2000):
     tokenizer.pre_tokenizer = Metaspace(replacement="▁")
     tokenizer.decoder = MetaspaceDecoder(replacement="▁")
 
-    trainer = UnigramTrainer(vocab_size=vocab_size, special_tokens=["[UNK]"])
+    trainer = UnigramTrainer(vocab_size=vocab_size, special_tokens=["[UNK]"], unk_token="[UNK]")
     tokenizer.train(files=train_files, trainer=trainer)
     return tokenizer
 

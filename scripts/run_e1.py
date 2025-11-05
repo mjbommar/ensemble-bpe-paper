@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import List, Dict, Any
@@ -27,8 +28,19 @@ import tomllib
 
 
 def _run(cmd: list[str]) -> str:
-    out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-    return out.decode("utf-8", errors="replace")
+    try:
+        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        return out.decode("utf-8", errors="replace")
+    except subprocess.CalledProcessError as e:
+        print(f"\n{'='*80}", file=sys.stderr)
+        print(f"ERROR: Command failed with exit code {e.returncode}", file=sys.stderr)
+        print(f"Command: {' '.join(cmd)}", file=sys.stderr)
+        print(f"{'='*80}", file=sys.stderr)
+        if e.output:
+            print("Output:", file=sys.stderr)
+            print(e.output.decode("utf-8", errors="replace"), file=sys.stderr)
+        print(f"{'='*80}\n", file=sys.stderr)
+        raise
 
 
 def _last_line(s: str) -> str:

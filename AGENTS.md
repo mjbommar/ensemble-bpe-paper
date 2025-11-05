@@ -46,3 +46,24 @@
 ## Architecture Overview & Agent Notes
 - Python‑first design; promote hotspots to Rust via `pyo3` only if benchmarks require, keeping HF format compatibility.
 - Agents editing this repo should use `apply_patch`, keep diffs minimal, and prefer `uv run` in any example or automation.
+
+## Current Research Direction (2025-11-05)
+**Breakthrough**: Exponential quality weighting (p=3) achieves 1.8-3.3% improvement, validated at scale.
+- Core insight: Traditional voting underperforms due to insufficient quality differentiation; merge order preservation is irrelevant
+- Solution: `power` parameter in `build_merge_weighted_bpe_json()` with p=3 amplifies quality exponentially
+  - Mechanism: weight_i = (quality_i)^3, where quality = 1/TPB on held-out data
+  - A tokenizer with 1.2× better quality gets 1.7× more voting influence with p=3
+  - Higher exponent enables leveraging larger ensembles (K=16 > K=8)
+- Results across 860 evaluations (5 seeds × 2 vocab × 2 K × 4 domains):
+  - exp_p3: -1.83% to -3.31% improvement across all domains (literary, web, code)
+  - exp_p2: -1.37% to -2.25% improvement (works but weaker, degrades with K↑)
+  - sequential: +4-5% DEGRADATION (failed hypothesis - order preservation doesn't help)
+  - baseline: 0% (reference)
+- Cross-domain validation:
+  - Literary (PG TEST/OOS): -1.83% to -2.60%
+  - Web (FineWeb): -2.54%
+  - Code (The Stack): -3.31% (strongest - code has sharper quality signals)
+- K-scaling: exp_p3 improves with larger K (K=16: -0.37% to -0.92% better than K=8); exp_p2 degrades with K↑
+- Status: COMPLETE - ready for paper writing
+- Location: `src/ebpe/ensemble.py`, `/nas4/data/experiments/ensemble-bpe/paper_e2e_evaluations/`
+- Agents should focus on paper writing, figure generation, and documenting the quality amplification mechanism

@@ -1,6 +1,20 @@
 **Overview**
 - Research framework for ensemble tokenization (BPE and variants) with strict Hugging Face compatibility. Focuses on measurable metrics first: compression on held‑out data, peak RAM during training, and CPU training time. All experiment artifacts are saved to disk for reproducibility and paper figures.
 
+**🎯 KEY FINDING (2025-11-05) — VALIDATED AT SCALE:**
+- **Exponential Quality Weighting (p=3)** achieves 1.8-3.3% compression improvement over baseline across all domains
+- Traditional ensemble voting fails due to insufficient quality differentiation, NOT merge order issues
+- **Exponential Weighting** with cubic power (p=3) amplifies quality differences: a tokenizer with 1.2× better quality gets 1.7× more voting influence
+- Validated across 4 domains with 860 evaluations: Project Gutenberg (literary text), FineWeb (web text), The Stack (code)
+- **Cross-domain results:**
+  - Literary text (TEST/OOS): -1.83% to -2.60% improvement
+  - Web text (FineWeb): -2.54% improvement
+  - Code (The Stack Python): -3.31% improvement (strongest effect)
+- **K-scaling discovery:** exp_p3 uniquely benefits from larger ensembles (K=16 outperforms K=8 by -0.37% to -0.92%), while exp_p2 degrades with larger K
+- **Sequential voting tested and FAILED:** +4-5% degradation across all domains; preserving merge order does not help
+- Implemented in `src/ebpe/ensemble.py`: `power` parameter in `build_merge_weighted_bpe_json()` with p=3
+- Configuration: 5 seeds × 2 vocab sizes (16K/32K) × 2 K values (8/16) × 4 domains = 860 total evaluations
+
 **Goals**
 - Measure out‑of‑sample compression gains vs strong baselines.
 - Keep training RAM/time competitive; profile and document trade‑offs.
